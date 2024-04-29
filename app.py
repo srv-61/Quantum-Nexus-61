@@ -1,6 +1,5 @@
 import os, sys, shutil, time
-
-from flask import Flask, request, jsonify, render_template,send_from_directory
+from flask import Flask, request, jsonify, render_template, send_from_directory
 import pandas as pd
 import joblib
 from sklearn.ensemble import RandomForestClassifier
@@ -9,11 +8,7 @@ import urllib.request
 import json
 from geopy.geocoders import Nominatim
 
-
-
 app = Flask(__name__)
-
-
 
 @app.route('/')
 def root():
@@ -63,8 +58,8 @@ def predict():
         data = data[cols]
 
         data['timestamp'] = pd.to_datetime(data['timestamp'].astype(str), errors='coerce')
-        data['timestamp'] = pd.to_datetime(data['timestamp'], format = '%d/%m/%Y %H:%M:%S')
-        column_1 = data.ix[:,0]
+        data['timestamp'] = pd.to_datetime(data['timestamp'], format = '%Y-%m-%dT%H:%M')
+        column_1 = data.iloc[:,0]
         DT=pd.DataFrame({"year": column_1.dt.year,
               "month": column_1.dt.month,
               "day": column_1.dt.day,
@@ -80,25 +75,22 @@ def predict():
         final=pd.concat([DT,data],axis=1)
         X=final.iloc[:,[1,2,3,4,6,10,11]].values
         my_prediction = rfc.predict(X)
-        if my_prediction[0][0] == 1:
+        if my_prediction[0] == 1:
             my_prediction='Predicted crime : Act 379-Robbery'
-        elif my_prediction[0][1] == 1:
+        elif my_prediction[1] == 1:
             my_prediction='Predicted crime : Act 13-Gambling'
-        elif my_prediction[0][2] == 1:
+        elif my_prediction[2] == 1:
             my_prediction='Predicted crime : Act 279-Accident'
-        elif my_prediction[0][3] == 1:
+        elif my_prediction[3] == 1:
             my_prediction='Predicted crime : Act 323-Violence'
-        elif my_prediction[0][4] == 1:
+        elif my_prediction[4] == 1:
             my_prediction='Predicted crime : Act 302-Murder'
-        elif my_prediction[0][5] == 1:
+        elif my_prediction[5] == 1:
             my_prediction='Predicted crime : Act 363-kidnapping'
         else:
             my_prediction='Place is safe no crime expected at that timestamp.'
 
-
-
-    return render_template('result.html', prediction = my_prediction)
-
+    return render_template('r1.html', prediction = my_prediction)
 
 if __name__ == '__main__':
     app.run(debug = True)
